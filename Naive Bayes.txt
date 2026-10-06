@@ -1,0 +1,103 @@
+--
+import matplotlib.pyplot as plt
+import seaborn as sns
+import pandas as pd
+
+from sklearn.model_selection import train_test_split
+from sklearn.naive_bayes import MultinomialNB, CategoricalNB, GaussianNB
+from sklearn.preprocessing import LabelEncoder
+from sklearn.metrics import classification_report, accuracy_score, confusion_matrix
+
+--
+df = pd.read_csv(r"C:\Users\User\Downloads\disease (1).csv")
+
+df.head(11)
+
+--
+df.info()
+
+--
+le = LabelEncoder()
+
+df['Sore Throat'] = le.fit_transform(df['Sore Throat'])
+df['Fever'] = le.fit_transform(df['Fever'])
+df['Swollen Glands'] = le.fit_transform(df['Swollen Glands'])
+df['Congestion'] = le.fit_transform(df['Congestion'])
+df['Headache'] = le.fit_transform(df['Headache'])
+df['Diagnosis'] = le.fit_transform(df['Diagnosis'])
+
+--
+df.info()
+
+--
+df.head(11)
+
+--
+fig, ax = plt.subplots(figsize=(6,6))
+sns.countplot(x=df['Sore Throat'], hue=df['Sore Throat'], palette='tab10', legend=False)
+plt.title("category wise count of 'Sore Throat'")
+plt.xlabel("category")
+plt.ylabel("count")
+plt.show()
+
+--
+fig, ax = plt.subplots(figsize=(6,6))
+sns.countplot(x=df['Fever'], hue=df['Fever'], palette='tab10', legend=False)
+plt.title("category wise count of 'Fever'")
+plt.xlabel("category")
+plt.ylabel("count")
+plt.show()
+
+--
+fig, ax = plt.subplots(figsize=(6,6))
+sns.countplot(x=df['Congestion'], hue=df['Congestion'], palette='tab10', legend=False)
+plt.title("category wise count of 'Congestion'")
+plt.xlabel("category")
+plt.ylabel("count")
+plt.show()
+
+--
+fig, ax = plt.subplots(figsize=(6,6))
+sns.countplot(x=df['Headache'], hue=df['Headache'], palette='tab10', legend=False)
+plt.title("category wise count of 'Headache'")
+plt.xlabel("category")
+plt.ylabel("count")
+plt.show()
+
+--
+fig, ax = plt.subplots(figsize=(6,6))
+sns.countplot(x=df['Swollen Glands'], hue=df['Swollen Glands'], palette='tab10', legend=False)
+plt.title("category wise count of 'Swollen Glands'")
+plt.xlabel("category")
+plt.ylabel("count")
+plt.show()
+
+--
+fig, ax = plt.subplots(figsize=(6,6))
+sns.countplot(x=df['Diagnosis'], hue=df['Diagnosis'], palette='tab10', legend=False)
+plt.title("category wise count of 'Diagnosis'")
+plt.xlabel("category")
+plt.ylabel("count")
+plt.show()
+
+--
+X = df.drop('Diagnosis', axis=1)
+y = df['Diagnosis']
+
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+--
+classifier = CategoricalNB()
+classifier.fit(X_train, y_train)
+
+y_pred = classifier.predict(X_test)
+
+
+print("Accuracy:", accuracy_score(y_test, y_pred))
+print("\nClassification Report")
+print(classification_report(y_test, y_pred))
+print("\nConfusion Matrix")
+print(confusion_matrix(y_test, y_pred))

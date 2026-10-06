@@ -1,0 +1,37 @@
+import pandas as pd, numpy as np, seaborn as sns, matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.ensemble import AdaBoostClassifier as Ada
+from sklearn.tree import DecisionTreeClassifier as Tree
+from sklearn.metrics import *
+
+df = pd.read_csv(r"C:\Users\User\Downloads\diabetes.csv").rename(columns={'DiabetesPedigreeFunction': 'DiabetesPedigree'})
+print(df.head())
+
+z = ['Glucose', 'BloodPressure', 'SkinThickness', 'Insulin', 'BMI']
+df[z] = df[z].replace(0, np.nan)
+df = df.fillna(df.median())
+
+x, y = df.drop('Outcome', axis=1), df.Outcome
+xtr, xte, ytr, yte = train_test_split(x, y, test_size=0.2, random_state=42, stratify=y)
+
+print("=== Base AdaBoost Performance ===")
+print(f"Accuracy: {Ada(random_state=42).fit(xtr, ytr).score(xte, yte):.4f}")
+
+pg = {'estimator': [Tree(max_depth=1), Tree(max_depth=2)],
+      'n_estimators': [50, 100, 150, 200], 'learning_rate': [0.01, 0.1, 0.5, 1.0]}
+g = GridSearchCV(Ada(random_state=42), pg, cv=5, scoring='accuracy', n_jobs=1, verbose=1, error_score='raise')
+print(pg); print(g)
+p = g.fit(xtr, ytr).predict(xte)
+
+print("\n=== Optimized AdaBoost Performance ===")
+print(f"Best Parameters: {g.best_params_}")
+print(f"Tuned Accuracy: {accuracy_score(yte, p):.4f}\n")
+print("Classification Report:")
+print(classification_report(yte, p))
+print("Confusion Matrix:")
+cm = confusion_matrix(yte, p); print(cm)
+
+l = ['No Diabetes', 'Diabetes']
+plt.figure(figsize=(6, 5))
+sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=l, yticklabels=l).set(xlabel='Predicted Label', ylabel='Actual Label', title='Confusion Matrix - Optimized AdaBoost')
+plt.show()
